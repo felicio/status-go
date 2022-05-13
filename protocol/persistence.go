@@ -492,10 +492,13 @@ func (db sqlitePersistence) Contacts() ([]*Contact, error) {
 			c.has_added_us,
 			c.local_nickname,
 			i.image_type,
-			i.payload
+			i.payload,
+			COALESCE(c.verification_status, 0) as verification_status,
+			COALESCE(t.trust_status, 0) as trust_status
 		FROM contacts c 
 		LEFT JOIN chat_identity_contacts i ON c.id = i.contact_id 
-		LEFT JOIN ens_verification_records v ON c.id = v.public_key;
+		LEFT JOIN ens_verification_records v ON c.id = v.public_key
+		LEFT JOIN trusted_users t ON c.id = t.id;
 	`)
 	if err != nil {
 		return nil, err
@@ -538,6 +541,8 @@ func (db sqlitePersistence) Contacts() ([]*Contact, error) {
 			&nickname,
 			&imageType,
 			&imagePayload,
+			&contact.VerificationStatus,
+			&contact.TrustStatus,
 		)
 		if err != nil {
 			return nil, err
@@ -725,11 +730,12 @@ func (db sqlitePersistence) SaveContact(contact *Contact, tx *sql.Tx) (err error
 			added,
 			blocked,
 			removed,
+			verification_status,
 			has_added_us,
 			name,
 			photo,
 			tribute_to_talk
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`)
 	if err != nil {
 		return
@@ -748,6 +754,7 @@ func (db sqlitePersistence) SaveContact(contact *Contact, tx *sql.Tx) (err error
 		contact.Added,
 		contact.Blocked,
 		contact.Removed,
+		contact.VerificationStatus,
 		contact.HasAddedUs,
 		//TODO we need to drop these columns
 		"",
