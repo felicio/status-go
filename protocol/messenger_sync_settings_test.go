@@ -78,7 +78,8 @@ type MessengerSyncSettingsSuite struct {
 }
 
 func (s *MessengerSyncSettingsSuite) SetupSuite() {
-	s.ignoreTests = true
+	//todo remove this ignore statement
+	s.ignoreTests = false
 }
 
 func (s *MessengerSyncSettingsSuite) SetupTest() {
