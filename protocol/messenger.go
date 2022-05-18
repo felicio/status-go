@@ -123,7 +123,7 @@ type Messenger struct {
 	account                              *multiaccounts.Account
 	mailserversDatabase                  *mailserversDB.Database
 	browserDatabase                      *browsers.Database
-	httpServer                           *server.Server
+	httpServer                           *server.MediaServer
 	quit                                 chan struct{}
 	requestedCommunities                 map[string]*transport.Filter
 	connectionState                      connection.State

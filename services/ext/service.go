@@ -105,7 +105,7 @@ func (s *Service) GetPeer(rawURL string) (*enode.Node, error) {
 	return enode.ParseV4(rawURL)
 }
 
-func (s *Service) InitProtocol(nodeName string, identity *ecdsa.PrivateKey, db *sql.DB, httpServer *server.Server, multiAccountDb *multiaccounts.Database, acc *multiaccounts.Account, logger *zap.Logger) error {
+func (s *Service) InitProtocol(nodeName string, identity *ecdsa.PrivateKey, db *sql.DB, httpServer *server.MediaServer, multiAccountDb *multiaccounts.Database, acc *multiaccounts.Account, logger *zap.Logger) error {
 	var err error
 	if !s.config.ShhextConfig.PFSEnabled {
 		return nil
@@ -390,7 +390,7 @@ func buildMessengerOptions(
 	config params.NodeConfig,
 	identity *ecdsa.PrivateKey,
 	db *sql.DB,
-	httpServer *server.Server,
+	httpServer *server.MediaServer,
 	multiAccounts *multiaccounts.Database,
 	account *multiaccounts.Account,
 	envelopesMonitorConfig *transport.EnvelopesMonitorConfig,

@@ -81,7 +81,7 @@ type StatusNode struct {
 	rpcClient *rpc.Client        // reference to an RPC client
 
 	downloader *ipfs.Downloader
-	httpServer *server.Server
+	httpServer *server.MediaServer
 
 	discovery discovery.Discovery
 	register  *peers.Register
@@ -150,7 +150,7 @@ func (n *StatusNode) GethNode() *node.Node {
 	return n.gethNode
 }
 
-func (n *StatusNode) HTTPServer() *server.Server {
+func (n *StatusNode) HTTPServer() *server.MediaServer {
 	n.mu.RLock()
 	defer n.mu.RUnlock()
 
@@ -236,7 +236,7 @@ func (n *StatusNode) startWithDB(config *params.NodeConfig, accs *accounts.Manag
 
 	n.downloader = ipfs.NewDownloader(config.RootDataDir)
 
-	httpServer, err := server.NewServer(n.appDB, n.downloader, nil)
+	httpServer, err := server.NewMediaServer(n.appDB, n.downloader)
 	if err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func (n *StatusNode) startWithDB(config *params.NodeConfig, accs *accounts.Manag
 	if err := httpServer.Start(); err != nil {
 		return err
 	}
-	httpServer.LoadMediaHandlers()
+	httpServer.WithMediaHandlers()
 
 	n.httpServer = httpServer
 
