@@ -71,6 +71,10 @@ const (
 
 	publicChat  chatContext = "public-chat"
 	privateChat chatContext = "private-chat"
+
+	maxChatMessageImageSize = 400000
+	resizeTargetImageSize   = 350000
+	idealTargetImageSize    = 50000
 )
 
 const messageResendMinDelay = 30
@@ -2394,6 +2398,7 @@ func (m *Messenger) sendChatMessage(ctx context.Context, message *common.Message
 
 	message.DisplayName = displayName
 	if len(message.ImagePath) != 0 {
+
 		file, err := os.Open(message.ImagePath)
 		if err != nil {
 			return nil, err
@@ -2403,8 +2408,25 @@ func (m *Messenger) sendChatMessage(ctx context.Context, message *common.Message
 		payload, err := ioutil.ReadAll(file)
 		if err != nil {
 			return nil, err
-
 		}
+
+		img, err := userimage.Decode(message.ImagePath)
+		if err != nil {
+			return nil, err
+		}
+
+		bb := bytes.NewBuffer([]byte{})
+		err = userimage.EncodeToLimits(bb, img, userimage.DimensionLimits{Ideal: idealTargetImageSize, Max: resizeTargetImageSize})
+
+		// We keep the smallest one
+		if len(payload) > len(bb.Bytes()) {
+			payload = bb.Bytes()
+		}
+
+		if len(payload) > maxChatMessageImageSize {
+			return nil, errors.New("image too large")
+		}
+
 		image := protobuf.ImageMessage{
 			Payload: payload,
 			Type:    images.ImageType(payload),
