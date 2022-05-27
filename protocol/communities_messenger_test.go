@@ -448,6 +448,7 @@ func (s *MessengerCommunitiesSuite) TestPostToCommunityChat() {
 		Name:        "status",
 		Color:       "#ffffff",
 		Description: "status community description",
+		Encrypted:   true,
 	}
 
 	// Create an community chat
@@ -508,6 +509,9 @@ func (s *MessengerCommunitiesSuite) TestPostToCommunityChat() {
 	s.Require().NoError(err)
 	s.Require().Len(communities, 2)
 	s.Require().Len(response.Communities(), 1)
+
+	communityID := response.Communities()[0].ID()
+	s.Require().Equal(communityID, community.ID())
 
 	ctx := context.Background()
 

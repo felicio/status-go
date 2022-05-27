@@ -100,6 +100,7 @@ func (o *Community) MarshalPublicAPIJSON() ([]byte, error) {
 		EnsName                string                          `json:"ensName"`
 		Link                   string                          `json:"link"`
 		CommunityAdminSettings CommunityAdminSettings          `json:"adminSettings"`
+		Encrypted              bool                            `json:"encrypted"`
 	}{
 		ID:         o.ID(),
 		Verified:   o.config.Verified,
@@ -114,6 +115,7 @@ func (o *Community) MarshalPublicAPIJSON() ([]byte, error) {
 				Position: int(c.Position),
 			}
 			communityItem.Categories[id] = category
+			communityItem.Encrypted = o.config.CommunityDescription.Encrypted
 		}
 		for id, c := range o.config.CommunityDescription.Chats {
 			canPost, err := o.CanPost(o.config.MemberIdentity, id, nil)
@@ -185,6 +187,7 @@ func (o *Community) MarshalJSON() ([]byte, error) {
 		IsMember               bool                                 `json:"isMember"`
 		Muted                  bool                                 `json:"muted"`
 		CommunityAdminSettings CommunityAdminSettings               `json:"adminSettings"`
+		Encrypted              bool                                 `json:"encrypted"`
 	}{
 		ID:                o.ID(),
 		Admin:             o.IsAdmin(),
@@ -206,6 +209,7 @@ func (o *Community) MarshalJSON() ([]byte, error) {
 				Name:     c.Name,
 				Position: int(c.Position),
 			}
+			communityItem.Encrypted = o.config.CommunityDescription.Encrypted
 			communityItem.Categories[id] = category
 		}
 		for id, c := range o.config.CommunityDescription.Chats {
@@ -282,6 +286,20 @@ func (o *Community) MembersCount() int {
 	return 0
 }
 
+func (o *Community) GetMemberPubkeys() []*ecdsa.PublicKey {
+	if o != nil &&
+		o.config != nil &&
+		o.config.CommunityDescription != nil {
+		pubkeys := make([]*ecdsa.PublicKey, len(o.config.CommunityDescription.Members))
+		i := 0
+		for hex := range o.config.CommunityDescription.Members {
+			pubkeys[i], _ = common.HexToPubkey(hex)
+			i++
+		}
+		return pubkeys
+	}
+	return nil
+}
 func (o *Community) initialize() {
 	if o.config.CommunityDescription == nil {
 		o.config.CommunityDescription = &protobuf.CommunityDescription{}
@@ -697,6 +715,14 @@ func (o *Community) Join() {
 
 func (o *Community) Leave() {
 	o.config.Joined = false
+}
+
+func (o *Community) Encrypted() bool {
+	return o.config.CommunityDescription.Encrypted
+}
+
+func (o *Community) Encrypt() {
+	o.config.CommunityDescription.Encrypted = true
 }
 
 func (o *Community) Joined() bool {

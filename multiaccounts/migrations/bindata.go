@@ -213,7 +213,7 @@ func _1648646095_image_clockDownSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "1648646095_image_clock.down.sql", size: 939, mode: os.FileMode(0644), modTime: time.Unix(1650623699, 0)}
+	info := bindataFileInfo{name: "1648646095_image_clock.down.sql", size: 939, mode: os.FileMode(0644), modTime: time.Unix(1653642660, 0)}
 	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x4d, 0xa8, 0x1f, 0xf, 0xe0, 0xd7, 0xc9, 0x68, 0x98, 0xd8, 0x37, 0xb8, 0xba, 0x9e, 0xb2, 0x19, 0xf3, 0xc4, 0x73, 0x80, 0x3, 0x17, 0x2a, 0x53, 0x68, 0x10, 0x13, 0x54, 0x99, 0xb1, 0xf5, 0x1c}}
 	return a, nil
 }
@@ -233,7 +233,7 @@ func _1648646095_image_clockUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "1648646095_image_clock.up.sql", size: 69, mode: os.FileMode(0644), modTime: time.Unix(1650623699, 0)}
+	info := bindataFileInfo{name: "1648646095_image_clock.up.sql", size: 69, mode: os.FileMode(0644), modTime: time.Unix(1653642660, 0)}
 	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x98, 0xa6, 0xa4, 0x4e, 0x4e, 0xca, 0x17, 0x56, 0xea, 0xfb, 0xf0, 0xa9, 0x81, 0x95, 0xe, 0x80, 0x52, 0x1, 0x47, 0x9b, 0xde, 0x14, 0xfa, 0x72, 0xc9, 0x62, 0x6f, 0x24, 0xa2, 0xc, 0x32, 0x50}}
 	return a, nil
 }
@@ -253,7 +253,7 @@ func _1649317600_add_color_hashUpSql() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "1649317600_add_color_hash.up.sql", size: 201, mode: os.FileMode(0644), modTime: time.Unix(1650623699, 0)}
+	info := bindataFileInfo{name: "1649317600_add_color_hash.up.sql", size: 201, mode: os.FileMode(0644), modTime: time.Unix(1653642660, 0)}
 	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x1a, 0xf, 0x37, 0x6d, 0xcf, 0x99, 0xc9, 0x2e, 0xdc, 0x70, 0x11, 0xb4, 0x36, 0x26, 0x4f, 0x39, 0xa8, 0x44, 0xf, 0xcb, 0xcc, 0x81, 0x74, 0x7a, 0x88, 0xaa, 0x54, 0x8c, 0xc4, 0xe, 0x56, 0x4f}}
 	return a, nil
 }

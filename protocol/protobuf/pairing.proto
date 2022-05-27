@@ -63,6 +63,7 @@ message SyncCommunity {
   bool verified = 6;
   bool muted = 7;
   repeated SyncCommunityRequestsToJoin requests_to_join = 8;
+  bool encrypted = 9;
 }
 
 message SyncCommunityRequestsToJoin {
