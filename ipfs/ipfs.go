@@ -1,6 +1,7 @@
 package ipfs
 
 import (
+	"context"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -32,6 +33,8 @@ type taskRequest struct {
 }
 
 type Downloader struct {
+	ctx             context.Context
+	cancel          func()
 	ipfsDir         string
 	wg              sync.WaitGroup
 	rateLimiterChan chan taskRequest
@@ -47,7 +50,11 @@ func NewDownloader(rootDir string) *Downloader {
 		panic("could not create IPFSDir")
 	}
 
+	ctx, cancel := context.WithCancel(context.TODO())
+
 	d := &Downloader{
+		ctx:             ctx,
+		cancel:          cancel,
 		ipfsDir:         ipfsDir,
 		rateLimiterChan: make(chan taskRequest, maxRequestsPerSecond),
 		inputTaskChan:   make(chan taskRequest, 1000),
@@ -67,6 +74,8 @@ func NewDownloader(rootDir string) *Downloader {
 
 func (d *Downloader) Stop() {
 	close(d.quit)
+
+	d.cancel()
 
 	d.wg.Wait()
 
@@ -202,6 +211,8 @@ func (d *Downloader) download(cid string, download bool) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	req = req.WithContext(d.ctx)
 
 	resp, err := d.client.Do(req)
 	if err != nil {
