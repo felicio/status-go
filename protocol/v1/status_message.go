@@ -276,6 +276,8 @@ func (m *StatusMessage) HandleApplication() error {
 		return m.unmarshalProtobufData(new(protobuf.CommunityMessageArchiveMagnetlink))
 	case protobuf.ApplicationMetadataMessage_SYNC_WALLET_ACCOUNT:
 		return m.unmarshalProtobufData(new(protobuf.SyncWalletAccounts))
+	case protobuf.ApplicationMetadataMessage_SYNC_COMMUNITY_SETTINGS:
+		return m.unmarshalProtobufData(new(protobuf.SyncCommunitySettings))
 	}
 	return nil
 }

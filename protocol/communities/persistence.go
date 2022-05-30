@@ -38,6 +38,23 @@ func (p *Persistence) SaveCommunity(community *Community) error {
 	return err
 }
 
+func (p *Persistence) ShouldHandleSyncCommunitySettings(settings *protobuf.SyncCommunitySettings) (bool, error) {
+
+	qr := p.db.QueryRow(`SELECT * FROM communities_settings WHERE id = ? AND synced_at > ?`, settings.CommunityId, settings.Clock)
+	_, err := p.scanRowToStruct(qr.Scan)
+	switch err {
+	case sql.ErrNoRows:
+		// Query does not match, therefore synced_at value is not older than the new clock value or id was not found
+		return true, nil
+	case nil:
+		// Error is nil, therefore query matched and synced_at is older than the new clock
+		return false, nil
+	default:
+		// Error is not nil and is not sql.ErrNoRows, therefore pass out the error
+		return false, err
+	}
+}
+
 func (p *Persistence) ShouldHandleSyncCommunity(community *protobuf.SyncCommunity) (bool, error) {
 	// TODO see if there is a way to make this more elegant
 	// Keep the "*".

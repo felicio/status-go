@@ -153,3 +153,9 @@ message SyncWalletAccount {
 message SyncWalletAccounts {
   repeated SyncWalletAccount accounts = 1;
 }
+
+message SyncCommunitySettings {
+  uint64 clock = 1;
+  string community_id = 2;
+  bool history_archive_support_enabled = 3;
+}

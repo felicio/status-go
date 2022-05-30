@@ -222,6 +222,11 @@ func (m *Messenger) JoinCommunity(ctx context.Context, communityID types.HexByte
 		if err != nil {
 			return nil, err
 		}
+
+    err = m.SyncCommunitySettings(context.Background(), &communitySettings)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return mr, nil
@@ -726,6 +731,10 @@ func (m *Messenger) EditCommunity(request *requests.EditCommunity) (*MessengerRe
 	response := &MessengerResponse{}
 	response.AddCommunity(community)
 	response.AddCommunitySettings(&communitySettings)
+	err = m.SyncCommunitySettings(context.Background(), &communitySettings)
+	if err != nil {
+		return nil, err
+	}
 
 	return response, nil
 }
@@ -1209,6 +1218,19 @@ func (m *Messenger) handleSyncCommunity(messageState *ReceivedMessageState, sync
 	return nil
 }
 
+func (m *Messenger) handleSyncCommunitySettings(messageState *ReceivedMessageState, syncCommunitySettings protobuf.SyncCommunitySettings) error {
+	shouldHandle, err := m.communitiesManager.ShouldHandleSyncCommunity(&syncCommunitySettings)
+	if err != nil {
+		m.logger.Debug("m.communitiesManager.ShouldHandleSyncCommunitySettings error", zap.Error(err))
+		return err
+	}
+	m.logger.Debug("ShouldHandleSyncCommunity result", zap.Bool("shouldHandle", shouldHandle))
+	if !shouldHandle {
+		return nil
+	}
+  return nil
+}
+
 func (m *Messenger) InitHistoryArchiveTasks(communities []*communities.Community) {
 
 	for _, c := range communities {
@@ -1424,4 +1446,36 @@ func (m *Messenger) GetCommunitiesSettings() ([]communities.CommunitySettings, e
 		return nil, err
 	}
 	return settings, nil
+}
+
+func (m *Messenger) SyncCommunitySettings(ctx context.Context, settings *communities.CommunitySettings) error {
+
+  if !m.hasPairedDevices() {
+    return nil
+  }
+
+	clock, chat := m.getLastClockWithRelatedChat()
+
+  syncMessage := &protobuf.SyncCommunitySettings{
+    Clock: clock,
+    CommunityId: settings.CommunityID,
+    HistoryArchiveSupportEnabled: settings.HistoryArchiveSupportEnabled,
+  }
+  encodedMessage, err := proto.Marshal(syncMessage)
+  if err != nil {
+    return err
+  }
+
+	_, err = m.dispatchMessage(ctx, common.RawMessage{
+		LocalChatID:         chat.ID,
+		Payload:             encodedMessage,
+		MessageType:         protobuf.ApplicationMetadataMessage_SYNC_COMMUNITY_SETTINGS,
+		ResendAutomatically: true,
+	})
+	if err != nil {
+		return err
+	}
+
+	chat.LastClockValue = clock
+	return m.saveChat(chat)
 }

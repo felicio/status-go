@@ -2694,6 +2694,15 @@ func (m *Messenger) SyncDevices(ctx context.Context, ensName, photoPath string) 
 		if err = m.syncCommunity(ctx, c); err != nil {
 			return err
 		}
+
+    communitySettings, err := m.communitiesManager.GetCommunitySettingsByID(c.ID())
+    if err != nil {
+      return err
+    }
+
+		if err = m.SyncCommunitySettings(ctx, communitySettings); err != nil {
+			return err
+		}
 	}
 
 	bookmarks, err := m.browserDatabase.GetBookmarks()
@@ -3498,7 +3507,18 @@ func (m *Messenger) handleRetrievedMessages(chatWithMessages map[transport.Filte
 							allMessagesProcessed = false
 							continue
 						}
-
+          case protobuf.SyncCommunitySettings:
+						logger.Debug("Handling SyncSyncCommunitySettings", zap.Any("message", p))
+						if !common.IsPubKeyEqual(messageState.CurrentMessageState.PublicKey, &m.identity.PublicKey) {
+							logger.Warn("not coming from us, ignoring")
+							continue
+						}
+						err = m.handleSyncSyncCommunitySettings(messageState, p)
+						if err != nil {
+							logger.Warn("failed to handle SyncClearHistory", zap.Error(err))
+							allMessagesProcessed = false
+							continue
+						}
 					case protobuf.Backup:
 						if !common.IsPubKeyEqual(messageState.CurrentMessageState.PublicKey, &m.identity.PublicKey) {
 							logger.Warn("not coming from us, ignoring")
