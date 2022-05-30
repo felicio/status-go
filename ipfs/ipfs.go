@@ -84,16 +84,11 @@ func (d *Downloader) Stop() {
 }
 
 func (d *Downloader) worker() {
-	for {
-		select {
-		case <-d.quit:
-			return
-		case request := <-d.rateLimiterChan:
-			resp, err := d.download(request.cid, request.download)
-			request.doneChan <- taskResponse{
-				err:      err,
-				response: resp,
-			}
+	for request := range d.rateLimiterChan {
+		resp, err := d.download(request.cid, request.download)
+		request.doneChan <- taskResponse{
+			err:      err,
+			response: resp,
 		}
 	}
 }
