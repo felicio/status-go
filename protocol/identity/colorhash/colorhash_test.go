@@ -45,6 +45,7 @@ func TestColorHash(t *testing.T) {
 	}
 
 	checker("0x0", &[][]int{{1, 0}})
+	checker("0x0", &[][]int{{1, 0}})
 	checker("0x1", &[][]int{{1, 1}})
 	checker("0x4", &[][]int{{2, 0}})
 	checker("0xF", &[][]int{{4, 3}})

@@ -27,7 +27,7 @@ func SerializePublicKey(key, outputBase string) (string, error) {
 		return "", err
 	}
 
-	kt, i, err := getPublicKeyType(dKey)
+	kt, i, err := getPublicKeyType(dKey) // key type; lenght of the number (how many bytes)
 	if err != nil {
 		return "", err
 	}
@@ -73,7 +73,7 @@ func getPublicKeyType(key []byte) (uint64, int, error) {
 // prependKeyIdentifier prepends an Unsigned Variable Integer (uvarint) to a given []byte
 func prependKeyIdentifier(key []byte, kt uint64, ktl int) []byte {
 	buf := make([]byte, ktl)
-	varint.PutUvarint(buf, kt)
+	varint.PutUvarint(buf, kt) // !
 
 	key = append(buf, key...)
 	return key
@@ -98,7 +98,7 @@ func compressPublicKey(key []byte, keyType uint64) ([]byte, error) {
 
 // compressSecp256k1PublicKey is a dedicated key compression function for secp256k1 pks
 func compressSecp256k1PublicKey(key []byte) ([]byte, error) {
-	x, y := elliptic.Unmarshal(secp256k1.S256(), key)
+	x, y := elliptic.Unmarshal(secp256k1.S256(), key) // packing and unpacking
 
 	if err := isSecp256k1XYValid(key, x, y); err != nil {
 		return nil, err

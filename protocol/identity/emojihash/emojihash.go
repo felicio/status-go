@@ -1,8 +1,11 @@
 package emojihash
 
+// package main
+
 import (
 	"bufio"
 	"bytes"
+	"encoding/hex"
 	"errors"
 	"math/big"
 	"strings"
@@ -11,9 +14,16 @@ import (
 	"github.com/status-im/status-go/static"
 )
 
+// func main() {
+// 	result, _ := GenerateFor("0x04e25da6994ea2dc4ac70727e07eca153ae92bf7609db7befb7ebdceaad348f4fc55bbe90abf9501176301db5aa103fc0eb3bc3750272a26c424a10887db2a7ea8")
+// 	// fmt.Println("o, world!")
+// 	_ = result
+// }
+
 const (
 	emojiAlphabetLen = 2757 // 20bytes of data described by 14 emojis requires at least 2757 length alphabet
-	emojiHashLen     = 14
+	// fixme?: 12
+	emojiHashLen = 14
 )
 
 var emojisAlphabet []string
@@ -27,17 +37,23 @@ func GenerateFor(pubkey string) ([]string, error) {
 		emojisAlphabet = *alphabet
 	}
 
+	// todo?: use SerializePublicKey
 	compressedKey, err := identity.ToCompressedKey(pubkey)
 	if err != nil {
 		return nil, err
 	}
 
+	// todo?: String.slice
+	// fixme?: slices all even if only slices[1] will be used
 	slices, err := identity.Slices(compressedKey)
 	if err != nil {
 		return nil, err
 	}
 
-	return toEmojiHash(new(big.Int).SetBytes(slices[1]), emojiHashLen, &emojisAlphabet)
+	slice1 := hex.EncodeToString(slices[1])
+	_ = slice1
+
+	return toEmojiHash(new(big.Int).SetBytes(slices[1]), emojiHashLen, &emojisAlphabet) // convert slice to number
 }
 
 func loadAlphabet() (*[]string, error) {
