@@ -19,6 +19,7 @@ import (
 	"github.com/status-im/status-go/protocol/communities"
 	"github.com/status-im/status-go/protocol/encryption/multidevice"
 	"github.com/status-im/status-go/protocol/protobuf"
+	"github.com/status-im/status-go/protocol/requests"
 	v1protocol "github.com/status-im/status-go/protocol/v1"
 	localnotifications "github.com/status-im/status-go/services/local-notifications"
 	"github.com/status-im/status-go/signal"
@@ -876,6 +877,16 @@ func (m *Messenger) HandleCommunityRequestToJoin(state *ReceivedMessageState, si
 		return err
 	}
 
+	if requestToJoin.State == communities.RequestToJoinStateAccepted {
+		accept := &requests.AcceptRequestToJoinCommunity{
+			ID: requestToJoin.ID,
+		}
+		_, err = m.AcceptRequestToJoinCommunity(accept)
+		if err != nil {
+			return err
+		}
+	}
+
 	state.Response.RequestsToJoinCommunity = append(state.Response.RequestsToJoinCommunity, requestToJoin)
 
 	community, err := m.communitiesManager.GetByID(requestToJoinProto.CommunityId)
@@ -887,8 +898,33 @@ func (m *Messenger) HandleCommunityRequestToJoin(state *ReceivedMessageState, si
 
 	contact, _ := state.AllContacts.Load(contactID)
 
-	state.Response.AddNotification(NewCommunityRequestToJoinNotification(requestToJoin.ID.String(), community, contact))
+	if requestToJoin.State == communities.RequestToJoinStatePending {
+		state.Response.AddNotification(NewCommunityRequestToJoinNotification(requestToJoin.ID.String(), community, contact))
+	}
 
+	return nil
+}
+
+func (m *Messenger) HandleCommunityRequestToJoinResponse(state *ReceivedMessageState, signer *ecdsa.PublicKey, requestToJoinResponseProto protobuf.CommunityRequestToJoinResponse) error {
+	if requestToJoinResponseProto.CommunityId == nil {
+		return errors.New("invalid community id")
+	}
+
+	err := m.communitiesManager.HandleCommunityRequestToJoinResponse(signer, &requestToJoinResponseProto)
+	if err != nil {
+		return err
+	}
+
+	if requestToJoinResponseProto.Accepted {
+		response, err := m.JoinCommunity(context.Background(), requestToJoinResponseProto.CommunityId)
+		if err != nil {
+			return err
+		}
+		if len(response.Communities()) > 0 {
+			state.Response.AddCommunity(response.Communities()[0])
+			state.Response.AddCommunitySettings(response.CommunitiesSettings()[0])
+		}
+	}
 	return nil
 }
 

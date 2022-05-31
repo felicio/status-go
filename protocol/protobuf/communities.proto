@@ -83,9 +83,10 @@ message CommunityRequestToJoin {
 
 message CommunityRequestToJoinResponse {
   uint64 clock = 1;
-  CommunityDescription community = 2;
-  bool accepted = 3;
-  bytes grant = 4;
+  bytes community_id = 2;
+  CommunityDescription community = 3;
+  bool accepted = 4;
+  bytes grant = 5;
 }
 
 message CommunityMessageArchiveMagnetlink {
